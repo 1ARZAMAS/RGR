@@ -1,138 +1,144 @@
 #include <iostream>
-#include <random>
+#include <string>
 #include <fstream>
-#include <vector>
-#include <sstream>
-#include <stdexcept>
 #include "windows.h"
-#include "Header2.h"
+#include "Header1.h"
 
 using namespace std;
+
 extern const char* SYSTEM_CLEAR;
 
-string code(const string& text, int randE_open, int N) {
+string code(const string& text, const string& key) {
     string encoded;
-    for (char c : text) {
-        long long M = static_cast<long long>(c);
-        long long C = modPower(M, randE_open, N);
-        encoded = encoded + to_string(C) + ' ';
-    }
+    for (int i = 0; i < text.length(); i++) {
+        encoded += (((int)(text[i]) + (int)(key[i % key.length()])) % 256);
+    } // Рє СЃРёРјРІРѕР»Сѓ С‚РµРєСЃС‚Р° РґРѕР±Р°РІР»СЏРµРј СЃРёРјРІРѕР» РєР»СЋС‡Р° Рё РґРµР»РёРј РЅР° 256 С‡С‚РѕР± РІСЃРµРіРґР° РѕСЃС‚Р°РІР°С‚СЊСЃСЏ РІ РґРёР°РїР°Р·РѕРЅРµ СЃРёРјРІРѕР»РѕРІ ASCII
     return encoded;
 }
 
-string decode(const string& text, int inversedD_closed, int N) {
+string decode(const string& text, const string& key) {
     string decoded;
-    istringstream iss(text);
-    long long num;
-    while (iss >> num) {
-        long long decSymb = modPower(num, inversedD_closed, N);
-        decoded += static_cast<char>(decSymb);
-    }
+    for (int i = 0; i < text.length(); i++)
+    {
+        decoded += (((int)(text[i]) - (int)(key[i % key.length()]) + 256) % 256);
+    } // РІС‹С‡РёС‚Р°РµРј РёР· Р·Р°С€РёС„СЂ С‚РµРєСЃС‚Р° РєР»СЋС‡ + 256 С‡С‚РѕР± РІСЃРµРіРґР° Р±С‹Р»Рё РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ Рё РґРµР»РёРј РЅР° 256 С‡С‚РѕР± РѕСЃС‚Р°РІР°С‚СЊСЃСЏ РІ РґРёР°РїР°Р·РѕРЅРµ
+    decoded = decoded.substr(0, decoded.length() - 1);
     return decoded;
 }
 
-void rsa(string& password) {
-    string text, userpass, fname;
+void viginer(string& password) {
+    string text, key, userPass, fname;
     int getChoice, getAction;
-    int min = 5000, max = 10000;
-    int randP = getRandomNumber(min, max), randQ = getRandomNumber(min, max);
-    int N = randP * randQ;
-    int phi_N = EilerFunc(randP) * EilerFunc(randQ);
-    int randE_open = getRandomNumber(min, phi_N);
-    while (NOD(phi_N, randE_open) != 1) {
-        randE_open = getRandomNumber(min, phi_N);
-    }
-    int inversedD_closed = modInverse(randE_open, phi_N);
-
     while (true) {
         try {
             system(SYSTEM_CLEAR);
             cout << "------------------MENU------------------" << endl;
-            cout << "Шифр RSA" << endl;
-            cout << "Выберите операцию: " << endl;
-            cout << "1. Шифрование" << endl;
-            cout << "2. Дешифрование" << endl;
-            cout << "3. Выход" << endl;
-            cout << "Введите номер операции: ";
+            cout << "РЁРёС„СЂ Р’РёР¶РµРЅРµСЂР°" << endl;
+            cout << "Р’С‹Р±РµСЂРёС‚Рµ РѕРїРµСЂР°С†РёСЋ: " << endl;
+            cout << "1. РЁРёС„СЂРѕРІР°РЅРёРµ" << endl;
+            cout << "2. Р”РµС€РёС„СЂРѕРІР°РЅРёРµ" << endl;
+            cout << "3. Р’С‹С…РѕРґ" << endl;
+            cout << "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ РѕРїРµСЂР°С†РёРё: ";
 
             cin >> getChoice;
-            
             if (cin.peek() != '\n' || cin.fail()) {
-                throw logic_error("Вы ввели недопустимое значение!");
+                throw logic_error("Р’С‹ РІРІРµР»Рё РЅРµРґРѕРїСѓСЃС‚РёРјРѕРµ Р·РЅР°С‡РµРЅРёРµ!");
             }
             if (getChoice == 3) {
                 break;
             }
             else if (getChoice != 1 && getChoice != 2) {
-                throw logic_error("Такой операции нет в списке!");
+                throw logic_error("РўР°РєРѕР№ РѕРїРµСЂР°С†РёРё РЅРµС‚ РІ СЃРїРёСЃРєРµ!");
             }
             else if (getChoice == 1) {
-                cout << "Введите пароль: ";
-                cin >> userpass;
-                if (userpass != password) {
-                    throw logic_error("Неверный пароль");
+                cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+                cin >> userPass;
+                if (userPass != password) {
+                    throw logic_error("РќРµРІРµСЂРЅС‹Р№ РїР°СЂРѕР»СЊ");
                 }
                 system(SYSTEM_CLEAR);
                 cout << "------------------MENU------------------" << endl;
-                cout << "Выберите ввод: " << endl;
-                cout << "1. С консоли" << endl;
-                cout << "2. Из файла" << endl;
-                cout << "Выберите номер операции: ";
+                cout << "Р’С‹Р±РµСЂРёС‚Рµ РІРІРѕРґ: " << endl;
+                cout << "1. РЎ РєРѕРЅСЃРѕР»Рё" << endl;
+                cout << "2. РР· С„Р°Р№Р»Р°" << endl;
+                cout << "Р’С‹Р±РµСЂРёС‚Рµ РЅРѕРјРµСЂ РѕРїРµСЂР°С†РёРё: ";
                 cin >> getAction;
                 if (cin.peek() != '\n' || cin.fail()) {
-                    throw logic_error("Вы ввели строку");
+                    throw logic_error("Р’С‹ РІРІРµР»Рё СЃС‚СЂРѕРєСѓ");
                 }
                 else if (getAction != 1 && getAction != 2) {
-                    throw logic_error("Такой операции нет в списке!");
+                    throw logic_error("РўР°РєРѕР№ РѕРїРµСЂР°С†РёРё РЅРµС‚ РІ СЃРїРёСЃРєРµ!");
                 }
                 cin.ignore(256, '\n');
-
                 if (getAction == 1) {
-                    cout << "Введите текст: ";
+                    cout << "Р’РІРµРґРёС‚Рµ С‚РµРєСЃС‚: ";
                     getline(cin, text);
                     writeToFile("plaintext.txt", text);
 
+                    cout << "Р’РІРµРґРёС‚Рµ РєР»СЋС‡: ";
+                    getline(cin, key);
+                    for (auto& i : key) {
+                        if (i >= 48 && i <= 57) {
+                            throw logic_error("РљР»СЋС‡ РґРѕР»Р¶РµРЅ СЃРѕСЃС‚РѕСЏС‚СЊ РёР· Р±СѓРєРІ!");
+                        }
+                    }
                     string encodedText = readFromFile("plaintext.txt");
-                    string encoded = code(encodedText, randE_open, N);
+                    string encoded = code(encodedText, key);
 
-                    writeToFile("RSAencrypted.txt", encoded);
-                    cout << "Зашифрованный текст записан в файл RSAencrypted.txt" << endl;
+                    writeToFile("VIGencrypted.txt", encoded);
+
+                    cout << "Р—Р°С€РёС„СЂРѕРІР°РЅРЅС‹Р№ С‚РµРєСЃС‚ Р·Р°РїРёСЃР°РЅ РІ С„Р°Р№Р» VIGencrypted.txt "<< endl;
                     Sleep(2000);
                 }
                 else if (getAction == 2) {
-                    cout << "Введите имя файла: ";
+                    cout << "Р’РІРµРґРёС‚Рµ РёРјСЏ С„Р°Р№Р»Р°: ";
                     cin >> fname;
                     cin.ignore(256, '\n');
-
                     string encodedText = readFromFile(fname);
 
-                    string encoded = code(encodedText, randE_open, N);
-                    writeToFile("RSAencrypted.txt", encoded);
+                    cout << "Р’РІРµРґРёС‚Рµ РєР»СЋС‡: ";
+                    getline(cin, key);
+                    for (auto& i : key) {
+                        if (i >= 48 && i <= 57) {
+                            throw logic_error("РљР»СЋС‡ РґРѕР»Р¶РµРЅ СЃРѕСЃС‚РѕСЏС‚СЊ РёР· Р±СѓРєРІ!");
+                        }
+                    }
+                    string encoded = code(encodedText, key);
+                    writeToFile("VIGencrypted.txt", encoded);
 
-                    cout << "Зашифрованный текст записан в файл RSAencrypted.txt" << endl;
+                    cout << "Р—Р°С€РёС„СЂРѕРІР°РЅРЅС‹Р№ С‚РµРєСЃС‚ Р·Р°РїРёСЃР°РЅ РІ С„Р°Р№Р» VIGencrypted.txt " << endl;
                     Sleep(2000);
                 }
                 else if (cin.peek() != '\n' || cin.fail()) {
-                    throw logic_error("Вы ввели строку");
+                    throw logic_error("Р’С‹ РІРІРµР»Рё СЃС‚СЂРѕРєСѓ");
                 }
             }
             else if (getChoice == 2) {
                 cin.ignore(256, '\n');
-                cout << "Введите пароль: ";
-                cin >> userpass;
-                if (userpass != password) {
-                    throw logic_error("Неверный пароль");
+                cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+                cin >> userPass;
+                if (userPass != password) {
+                    throw logic_error("РќРµРІРµСЂРЅС‹Р№ РїР°СЂРѕР»СЊ");
                 }
-                string encodedText = readFromFile("RSAencrypted.txt");
-                string decoded = decode(encodedText, inversedD_closed, N);
+                cout << "Р’РІРµРґРёС‚Рµ РєР»СЋС‡: ";
+                cin.ignore(256, '\n');
+                getline(cin, key);
+                for (auto& i : key) {
+                    if (i >= 48 && i <= 57) {
+                        throw logic_error("РљР»СЋС‡ РґРѕР»Р¶РµРЅ СЃРѕСЃС‚РѕСЏС‚СЊ РёР· Р±СѓРєРІ!");
+                    }
+                }
+                string encodedText = readFromFile("VIGencrypted.txt");
+                string decoded = decode(encodedText, key);
 
-                writeToFile("RSAdecrypted.txt", decoded);
-                cout << "Расшифрованный текст записан в файл RSAdecrypted.txt" << endl;
+                writeToFile("VIGdecrypted.txt", decoded);
+
+                cout << "Р Р°СЃС€РёС„СЂРѕРІР°РЅРЅС‹Р№ С‚РµРєСЃС‚ Р·Р°РїРёСЃР°РЅ РІ С„Р°Р№Р» VIGdecrypted.txt" << endl;
                 Sleep(2000);
             }
         }
         catch (const exception& e) {
-            cerr << "Ошибка: " << e.what() << endl;
+            cerr << "РћС€РёР±РєР°: " << e.what() << endl;
             cin.clear();
             cin.ignore(256, '\n');
         }
